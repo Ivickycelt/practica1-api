@@ -1,22 +1,26 @@
 <?php
-use App\Http\Controllers\CategoriaController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\AuthController; 
 
-// Rutas de autenticación que ya tienes funcionando
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
-Route::post('logout', [AuthController::class, 'logout']);
-Route::get('me', [AuthController::class, 'me']);
+// 🟢 RUTAS PÚBLICAS (Agrega las de Login y Registro aquí arriba)
+Route::post('login', [AuthController::class, 'login']);       // 🔥 FALTA ESTA LÍNEA
+Route::post('register', [AuthController::class, 'register']); // 🔥 FALTA ESTA LÍNEA
 
-// 🌟 RUTAS DE PRODUCTOS (Declaradas explícitamente fuera de cualquier restricción)
 Route::get('productos', [ProductoController::class, 'index']);
+Route::get('categorias', [CategoriaController::class, 'index']);
 Route::get('productos/{producto}', [ProductoController::class, 'show']);
-Route::post('productos', [ProductoController::class, 'store']); 
-Route::post('productos/{producto}', [ProductoController::class, 'update']);
-Route::delete('productos/{producto}', [ProductoController::class, 'destroy']);
 
-Route::apiResource('categorias', CategoriaController::class); //
-Route::get('categorias/{categoria}/productos', [CategoriaController::class, 'productos']); //
+// 🔒 RUTAS PROTEGIDAS (Solo para usuarios autenticados)
+Route::group(['middleware' => ['auth']], function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+    
+    // Acciones protegidas por Sanctum y tus Policies
+    Route::post('productos', [ProductoController::class, 'store']);
+    Route::put('productos/{producto}', [ProductoController::class, 'update']);
+    Route::delete('productos/{producto}', [ProductoController::class, 'destroy']);
+});

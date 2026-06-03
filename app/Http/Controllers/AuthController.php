@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate; // 🔥 IMPORTACIÓN CRUCIAL QUE FALTABA
 
 class AuthController extends Controller
 {
@@ -22,6 +23,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'client', // Rol por defecto (en inglés para tests)
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -32,7 +34,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // 2. LOGIN (Vale 15 puntos en tu rúbrica en caso de error)
+    // 2. LOGIN (Modificado para que Vue reciba los permisos de inmediato)
     public function login(Request $request)
     {
         $request->validate([
@@ -41,7 +43,6 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
-            // Retorna explícitamente el 401 con el mensaje requerido
             return response()->json([
                 'message' => 'Credenciales incorrectas. Verifica tus datos.'
             ], 401);
@@ -50,8 +51,21 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // 🔑 Generamos los permisos usando los roles directamente para asegurar compatibilidad inmediata con v-can
+        $permisos = [
+            'crear'    => in_array($user->role, ['admin', 'editor']),
+            'editar'   => in_array($user->role, ['admin', 'editor']),
+            'eliminar' => $user->role === 'admin',
+        ];
+
         return response()->json([
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'permisos' => $permisos // 🔥 Ahora Vue los tiene desde el segundo uno
+            ],
             'token' => $token,
         ], 200);
     }
@@ -66,9 +80,24 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // 4. ENDPOINT /ME (Para pintar los datos en tu Dashboard)
+    // 4. ENDPOINT /ME (Corregido y optimizado para v-can)
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+
+        // 🔑 Mapeo directo y seguro de permisos basado en el rol de la Base de Datos
+        $permisos = [
+            'crear'    => in_array($user->role, ['admin', 'editor']),
+            'editar'   => in_array($user->role, ['admin', 'editor']),
+            'eliminar' => $user->role === 'admin',
+        ];
+
+        return response()->json([
+            'id'       => $user->id,
+            'name'     => $user->name,
+            'email'    => $user->email,
+            'role'      => $user->role, 
+            'permisos' => $permisos // 🔥 Enviado correctamente a Pinia
+        ]);
     }
 }

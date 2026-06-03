@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany; // 👈 AGREGA ESTA IMPORTACIÓN AQUÍ
 
 class Categoria extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'slug', 'descripcion'];
+    // Asegúrate de agregar el fillable por si tu base de datos exige registrar estos campos
+    protected $fillable = ['nombre', 'slug']; 
 
-    // Esta es la relación inversa a la que definimos en Producto.php
     public function productos(): HasMany
     {
-        return $this->hasMany(Producto::class); //
+        return $this->hasMany(Producto::class);
     }
 }

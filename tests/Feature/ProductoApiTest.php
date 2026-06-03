@@ -2,13 +2,28 @@
 
 namespace Tests\Feature;
 
-use App\Models\Producto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Producto;
+use App\Models\Categoria;
 use Tests\TestCase;
 
 class ProductoApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    private $categoria;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        
+        // Autenticamos al usuario globalmente para cada test
+        $user = \App\Models\User::factory()->create();
+        $this->actingAs($user);
+
+        // Creamos una categoría por defecto para usar en las pruebas
+        $this->categoria = Categoria::factory()->create();
+    }
 
     public function test_index_returns_productos_list(): void
     {
@@ -17,6 +32,7 @@ class ProductoApiTest extends TestCase
             'descripcion' => 'Camiseta de algodón',
             'precio' => 19.99,
             'stock' => 10,
+            'categoria_id' => $this->categoria->id,
         ]);
 
         $response = $this->getJson('/api/productos');
@@ -33,6 +49,7 @@ class ProductoApiTest extends TestCase
             'descripcion' => 'Zapatos deportivos',
             'precio' => 79.95,
             'stock' => 5,
+            'categoria_id' => $this->categoria->id, // Envía la categoría requerida
         ];
 
         $response = $this->postJson('/api/productos', $payload);
@@ -50,6 +67,7 @@ class ProductoApiTest extends TestCase
             'descripcion' => 'Gorra con logo',
             'precio' => 15.00,
             'stock' => 3,
+            'categoria_id' => $this->categoria->id,
         ]);
 
         $response = $this->getJson("/api/productos/{$producto->id}");
@@ -65,6 +83,7 @@ class ProductoApiTest extends TestCase
             'descripcion' => 'Bolso de mano',
             'precio' => 45.00,
             'stock' => 2,
+            'categoria_id' => $this->categoria->id,
         ]);
 
         $payload = [
@@ -72,6 +91,7 @@ class ProductoApiTest extends TestCase
             'descripcion' => 'Bolso de mano grande',
             'precio' => 50.00,
             'stock' => 4,
+            'categoria_id' => $this->categoria->id,
         ];
 
         $response = $this->putJson("/api/productos/{$producto->id}", $payload);
@@ -89,6 +109,7 @@ class ProductoApiTest extends TestCase
             'descripcion' => 'Llavero metálico',
             'precio' => 5.50,
             'stock' => 15,
+            'categoria_id' => $this->categoria->id,
         ]);
 
         $response = $this->deleteJson("/api/productos/{$producto->id}");

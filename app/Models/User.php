@@ -11,9 +11,17 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    // Incluimos HasApiTokens junto a los otros rasgos (traits) que ya tenías
     use HasApiTokens, HasFactory, Notifiable;
 
+    public function esAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function esEditor(): bool
+    {
+        return $this->role === 'editor';
+    }
     /**
      * The attributes that are mass assignable.
      *
@@ -23,6 +31,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -40,11 +49,8 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 }
