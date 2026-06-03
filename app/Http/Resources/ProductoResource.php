@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductoResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -20,9 +15,8 @@ class ProductoResource extends JsonResource
             'descripcion' => $this->descripcion,
             'precio'      => $this->precio,
             'stock'       => $this->stock,
-            // Si tiene imagen, genera la URL web completa; si no, devuelve nulo
-            'imagen_url'  => $this->imagen ? asset('storage/' . $this->imagen) : null,
-            'created_at'  => $this->created_at,
+            'imagen_url'  => $this->imagen ? asset('storage/' . $this->imagen) : null, //
+            'categoria'   => new CategoriaResource($this->whenLoaded('categoria')), //
         ];
     }
 }

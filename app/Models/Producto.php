@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Producto extends Model
 {
-    protected $fillable = [
-    'nombre',
-    'descripcion',
-    'precio',
-    'stock'
-];
+    use HasFactory;
+
+    protected $fillable = ['nombre', 'precio', 'stock', 'descripcion', 'imagen', 'categoria_id'];
+
+    public function categoria(): BelongsTo
+    {
+        return $this->belongsTo(Categoria::class); //
+    }
 }

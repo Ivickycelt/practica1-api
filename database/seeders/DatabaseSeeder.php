@@ -15,8 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        
+{
+    // Llama al sembrador de categorías y productos
+    $this->call(CategoriaProductoSeeder::class);
+}
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
